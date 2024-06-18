@@ -80,12 +80,25 @@ function getBoolean(value) {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         try {
             // get information on everything
             const token = core.getInput("github-token", { required: true });
             const octokit = (0, github_1.getOctokit)(token);
             const pathToScan = core.getInput("pathToScan");
-            const regex = core.getInput("regex");
+            const inputRegex = core.getInput("regex");
+            if (!inputRegex) {
+                core.setFailed("❌ Empty regex! Regex is required!");
+                return;
+            }
+            var regex;
+            try {
+                regex = new RegExp(inputRegex, "g");
+            }
+            catch (error) {
+                core.setFailed("❌ Invalid regex:'" + inputRegex + "'");
+                return;
+            }
             const newFilesOnly = getBoolean(core.getInput("newFilesOnly"));
             const payload = github_1.context.payload;
             const pull_request = payload.pull_request;
@@ -106,11 +119,26 @@ function run() {
                 }
                 core.info("Checking diff contents");
                 const parsedDiff = yield getDiff(octokit, repository, pull_request);
-                parsedDiff.forEach(function (file) {
+                var extractedContent = '';
+                outerLoop: for (let file of parsedDiff) {
                     if ((newFilesOnly && file.new) || !newFilesOnly) {
-                        console.log(JSON.stringify(file));
+                        if ((pathToScan && ((_a = file.to) === null || _a === void 0 ? void 0 : _a.startsWith(pathToScan))) || !pathToScan) {
+                            for (let chunk of file.chunks) {
+                                for (let change of chunk.changes) {
+                                    if (change.type === "add") {
+                                        var matches = regex.exec(change.content);
+                                        if ((matches === null || matches === void 0 ? void 0 : matches.length) && (matches === null || matches === void 0 ? void 0 : matches.length) > 0) {
+                                            extractedContent = matches[1];
+                                            break outerLoop;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-                });
+                }
+                console.log(`Extracted content: ${JSON.stringify(extractedContent)}`);
+                core.setOutput("capturedContent", extractedContent);
             }
         }
         catch (error) {

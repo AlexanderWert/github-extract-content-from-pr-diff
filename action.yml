@@ -7,11 +7,17 @@ branding:
 inputs:
   github-token:
     description: "Github token, added magically"
+    reguired: true
   pathToScan:
     description: "Path or prefix of files to scan the diff for."
+    reguired: false
+    default: ""
   newFilesOnly:
     description: "Scan only new files"
+    reguired: false
+    default: false
   regex:
+    reguired: true
     description: "Regex to use for content extraction. Must contain exactly one regex group."
 outputs:
   capturedContent:

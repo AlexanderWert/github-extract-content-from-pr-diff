@@ -42,7 +42,18 @@ async function run() {
     const octokit = getOctokit(token);
 
     const pathToScan = core.getInput("pathToScan");
-    const regex = core.getInput("regex");
+    const inputRegex = core.getInput("regex");
+    if (!inputRegex) {
+      core.setFailed("❌ Empty regex! Regex is required!")
+      return;
+    }
+    var regex : RegExp;
+    try {
+      regex = new RegExp(inputRegex, "g");
+    } catch (error: any) {
+      core.setFailed("❌ Invalid regex:'" + inputRegex + "'")
+      return;
+    }
     const newFilesOnly = getBoolean(core.getInput("newFilesOnly"));
 
     const payload = context.payload;
@@ -69,12 +80,26 @@ async function run() {
 
       core.info("Checking diff contents");
       const parsedDiff = await getDiff(octokit, repository, pull_request);
-
-      parsedDiff.forEach(function (file) {
+      var extractedContent = '';
+      outerLoop: for (let file of parsedDiff) {
         if ((newFilesOnly && file.new) || !newFilesOnly) {
-            console.log(JSON.stringify(file))
+          if((pathToScan && file.to?.startsWith(pathToScan)) || !pathToScan) {
+            for (let chunk of file.chunks) {
+              for (let change of chunk.changes) {
+                if (change.type === "add"){
+                    var matches = regex.exec(change.content);
+                    if (matches?.length && matches?.length > 0){
+                      extractedContent = matches[1];
+                      break outerLoop;
+                    }
+                }
+              }
+            }
+          }
         }
-      });
+      }
+      console.log(`Extracted content: ${JSON.stringify(extractedContent)}`)
+      core.setOutput("capturedContent", extractedContent);
     }
   } catch (error: any) {
     if (error.name === "HttpError") {
