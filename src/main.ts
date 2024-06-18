@@ -82,21 +82,30 @@ async function run() {
       const parsedDiff = await getDiff(octokit, repository, pull_request);
       var extractedContent = '';
       outerLoop: for (let file of parsedDiff) {
+        console.log(`Start checking file: ${JSON.stringify(file.to)}`)
         if ((newFilesOnly && file.new) || !newFilesOnly) {
           if((pathToScan && file.to?.startsWith(pathToScan)) || !pathToScan) {
             for (let chunk of file.chunks) {
               for (let change of chunk.changes) {
                 if (change.type === "add"){
+
+                  console.log(`    Start checking line: ${JSON.stringify(change.content)}`)
                     var matches = regex.exec(change.content);
+                    if(matches){
+                      console.log(`        Matches: ${JSON.stringify(matches)}`)
+                    }
                     if (matches?.length && matches?.length > 0){
                       extractedContent = matches[1];
                       break outerLoop;
                     }
+                  
+                  console.log(`    End checking line: ${JSON.stringify(change.content)}`)
                 }
               }
             }
           }
         }
+        console.log(`End checking file: ${JSON.stringify(file.to)}`)
       }
       console.log(`Extracted content: ${JSON.stringify(extractedContent)}`)
       core.setOutput("capturedContent", extractedContent);
