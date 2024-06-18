@@ -40,7 +40,7 @@ async function run() {
     // get information on everything
     const token = core.getInput("github-token", { required: true });
     const octokit = getOctokit(token);
-
+    
     const pathToScan = core.getInput("pathToScan");
     const inputRegex = core.getInput("regex");
     if (!inputRegex) {
@@ -54,6 +54,7 @@ async function run() {
       core.setFailed("❌ Invalid regex:'" + inputRegex + "'")
       return;
     }
+    const indexGroupToCapture = parseInt(core.getInput("indexGroupToCapture"));
     const newFilesOnly = getBoolean(core.getInput("newFilesOnly"));
 
     const payload = context.payload;
@@ -94,8 +95,8 @@ async function run() {
                     if(matches){
                       console.log(`        Matches: ${JSON.stringify(matches)}`)
                     }
-                    if (matches?.length && matches?.length > 0){
-                      extractedContent = matches[1];
+                    if (matches?.length && matches?.length > indexGroupToCapture){
+                      extractedContent = matches[indexGroupToCapture];
                       break outerLoop;
                     }
                   

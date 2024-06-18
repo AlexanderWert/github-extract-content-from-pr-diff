@@ -99,6 +99,7 @@ function run() {
                 core.setFailed("❌ Invalid regex:'" + inputRegex + "'");
                 return;
             }
+            const indexGroupToCapture = parseInt(core.getInput("indexGroupToCapture"));
             const newFilesOnly = getBoolean(core.getInput("newFilesOnly"));
             const payload = github_1.context.payload;
             const pull_request = payload.pull_request;
@@ -132,8 +133,8 @@ function run() {
                                         if (matches) {
                                             console.log(`        Matches: ${JSON.stringify(matches)}`);
                                         }
-                                        if ((matches === null || matches === void 0 ? void 0 : matches.length) && (matches === null || matches === void 0 ? void 0 : matches.length) > 0) {
-                                            extractedContent = matches[1];
+                                        if ((matches === null || matches === void 0 ? void 0 : matches.length) && (matches === null || matches === void 0 ? void 0 : matches.length) > indexGroupToCapture) {
+                                            extractedContent = matches[indexGroupToCapture];
                                             break outerLoop;
                                         }
                                         console.log(`    End checking line: ${JSON.stringify(change.content)}`);

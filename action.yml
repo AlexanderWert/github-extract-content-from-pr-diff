@@ -19,6 +19,10 @@ inputs:
   regex:
     reguired: true
     description: "Regex to use for content extraction. Must contain exactly one regex group."
+  indexGroupToCapture:
+    required: false
+    description: "The index (starting with 1) of the regex group to extract values from."
+    default: 1
 outputs:
   capturedContent:
     description: "The content captured through the regex group"
