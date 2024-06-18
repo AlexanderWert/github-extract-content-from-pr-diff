@@ -122,30 +122,22 @@ function run() {
                 const parsedDiff = yield getDiff(octokit, repository, pull_request);
                 var extractedContent = '';
                 outerLoop: for (let file of parsedDiff) {
-                    console.log(`Start checking file: ${JSON.stringify(file.to)}`);
                     if ((newFilesOnly && file.new) || !newFilesOnly) {
                         if ((pathToScan && ((_a = file.to) === null || _a === void 0 ? void 0 : _a.startsWith(pathToScan))) || !pathToScan) {
                             for (let chunk of file.chunks) {
                                 for (let change of chunk.changes) {
                                     if (change.type === "add") {
-                                        console.log(`    Start checking line: ${JSON.stringify(change.content)}`);
                                         var matches = regex.exec(change.content);
-                                        if (matches) {
-                                            console.log(`        Matches: ${JSON.stringify(matches)}`);
-                                        }
                                         if ((matches === null || matches === void 0 ? void 0 : matches.length) && (matches === null || matches === void 0 ? void 0 : matches.length) > indexGroupToCapture) {
                                             extractedContent = matches[indexGroupToCapture];
                                             break outerLoop;
                                         }
-                                        console.log(`    End checking line: ${JSON.stringify(change.content)}`);
                                     }
                                 }
                             }
                         }
                     }
-                    console.log(`End checking file: ${JSON.stringify(file.to)}`);
                 }
-                console.log(`Extracted content: ${JSON.stringify(extractedContent)}`);
                 core.setOutput("capturedContent", extractedContent);
             }
         }
