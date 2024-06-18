@@ -1,0 +1,32 @@
+{
+   "name": "github-extract-content-from-pr-diff",
+   "version": "1",
+   "private": false,
+   "description": "An action that extracts content from a PR diff.",
+   "main": "lib/main.js",
+   "scripts": {
+      "build": "tsc && ncc build --source-map --license licenses.txt"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/AlexanderWert/github-extract-content-from-pr-diff.git"
+   },
+   "keywords": [
+      "actions",
+      "node",
+      "diff",
+      "pull request"
+   ],
+   "author": "AlexanderWert",
+   "license": "Apache-2.0",
+   "dependencies": {
+      "@actions/github": "^6.0.0",
+      "parse-diff": "^0.6.0"
+   },
+   "devDependencies": {
+      "@actions/core": "^1.10.1",
+      "@types/node": "^18.11.18",
+      "@vercel/ncc": "^0.38.1",
+      "typescript": "^5.2.2"
+   }
+}

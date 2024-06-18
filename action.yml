@@ -1,0 +1,22 @@
+name: "Extract content from a PR's diff"
+description: "Uses a regex to extract content from a PR's diff."
+author: "AlexanderWert"
+branding:
+  icon: "git-pull-request"
+  color: "gray-dark"
+inputs:
+  github-token:
+    description: "Github token, added magically"
+  pathToScan:
+    description: "Path or prefix of files to scan the diff for."
+  newFilesOnly:
+    description: "Scan only new files"
+  regex:
+    description: "Regex to use for content extraction. Must contain exactly one regex group."
+outputs:
+  capturedContent:
+    description: "The content captured through the regex group"
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
