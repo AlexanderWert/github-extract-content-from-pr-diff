@@ -118,24 +118,33 @@ function run() {
                     core.setFailed("❌ Expecting repository metadata.");
                     return;
                 }
-                core.info("Checking diff contents");
+                core.info("Checking diff contents ...");
                 const parsedDiff = yield getDiff(octokit, repository, pull_request);
                 var extractedContent = '';
                 outerLoop: for (let file of parsedDiff) {
                     if ((newFilesOnly && file.new) || !newFilesOnly) {
                         if ((pathToScan && ((_a = file.to) === null || _a === void 0 ? void 0 : _a.startsWith(pathToScan))) || !pathToScan) {
+                            console.log(`Start checking file: ${JSON.stringify(file.to)}`);
                             for (let chunk of file.chunks) {
                                 for (let change of chunk.changes) {
                                     if (change.type === "add") {
                                         var matches = regex.exec(change.content);
                                         if ((matches === null || matches === void 0 ? void 0 : matches.length) && (matches === null || matches === void 0 ? void 0 : matches.length) > indexGroupToCapture) {
                                             extractedContent = matches[indexGroupToCapture];
+                                            console.log(`Extracted content: ${JSON.stringify(extractedContent)}`);
                                             break outerLoop;
                                         }
                                     }
                                 }
                             }
+                            console.log(`End checking file: ${JSON.stringify(file.to)}`);
                         }
+                        else {
+                            console.log(`Skipped file (because not in path): ${JSON.stringify(file.to)}`);
+                        }
+                    }
+                    else {
+                        console.log(`Skipped file (because not new): ${JSON.stringify(file.to)}`);
                     }
                 }
                 core.setOutput("capturedContent", extractedContent);

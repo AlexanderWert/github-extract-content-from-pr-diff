@@ -79,24 +79,33 @@ async function run() {
       }
 
 
-      core.info("Checking diff contents");
+      core.info("Checking diff contents ...");
       const parsedDiff = await getDiff(octokit, repository, pull_request);
       var extractedContent = '';
       outerLoop: for (let file of parsedDiff) {
         if ((newFilesOnly && file.new) || !newFilesOnly) {
           if((pathToScan && file.to?.startsWith(pathToScan)) || !pathToScan) {
+            console.log(`Start checking file: ${JSON.stringify(file.to)}`)
+
             for (let chunk of file.chunks) {
               for (let change of chunk.changes) {
                 if (change.type === "add"){
                     var matches = regex.exec(change.content);
                     if (matches?.length && matches?.length > indexGroupToCapture){
                       extractedContent = matches[indexGroupToCapture];
+                      console.log(`Extracted content: ${JSON.stringify(extractedContent)}`)
                       break outerLoop;
                     }
                 }
               }
             }
+
+            console.log(`End checking file: ${JSON.stringify(file.to)}`)
+          } else {
+            console.log(`Skipped file (because not in path): ${JSON.stringify(file.to)}`)
           }
+        } else {
+          console.log(`Skipped file (because not new): ${JSON.stringify(file.to)}`)
         }
       }
       core.setOutput("capturedContent", extractedContent);
